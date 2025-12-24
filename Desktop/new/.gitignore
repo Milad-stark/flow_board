@@ -7,15 +7,36 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+# package-lock.json should be committed
+# yarn.lock should be committed
+# pnpm-lock.yaml should be committed
+
+# Build outputs
 dist
 dist-ssr
-*.local
+build
+target
+*.jar
+*.war
 
-# Editor directories and files
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
+*.iml
 .DS_Store
 *.suo
 *.ntvs*
@@ -23,4 +44,26 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Test files (optional - remove if you want to commit tests)
+# *.test.js
+# *.spec.js
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Spring Boot
+application-local.properties
+application-dev.properties

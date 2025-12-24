@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: flowboard-postgres
+    environment:
+      POSTGRES_DB: flowboard
+      POSTGRES_USER: flowboard_user
+      POSTGRES_PASSWORD: flowboard_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - flowboard-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowboard_user -d flowboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowboard-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/flowboard
+      SPRING_DATASOURCE_USERNAME: flowboard_user
+      SPRING_DATASOURCE_PASSWORD: flowboard_pass
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production-min-256-bits-please-use-a-strong-secret-key}
+      CHATBOT_API_URL: ${CHATBOT_API_URL:-}
+      CHATBOT_API_KEY: ${CHATBOT_API_KEY:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - flowboard-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8080/api
+    container_name: flowboard-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - flowboard-network
+    restart: unless-stopped
+
+networks:
+  flowboard-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
